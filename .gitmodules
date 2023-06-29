@@ -1,0 +1,3 @@
+[submodule "glaze"]
+	path = glaze
+	url = git@github.com:stephenberry/glaze.git
