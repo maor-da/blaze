@@ -142,9 +142,27 @@ void static_test()
 	printf("\n");
 }
 
+struct test {
+	int a;
+	const char* b;
+	char* c;
+	std::string str = "dfgsdf";
+
+	struct glaze {
+		using T						= test;
+		static constexpr auto value = json::struct_meta(json_key(a), json_key(b), json_key(c), json_key(str));
+	};
+};
+
 void main()
 {
 	SetConsoleOutputCP(65001);
+
+	test obj{};
+	std::string buffer{};
+	glz::write<glz::opts{.prettify = true}>(obj, buffer);
+
+	printf("%s", buffer.c_str());
 
 	dynamic_test();
 	meta_test();
