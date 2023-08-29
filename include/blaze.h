@@ -1,3 +1,4 @@
+#pragma once
 #include "../glaze/include/glaze/glaze.hpp"
 
 #include <expected>	 // c++23
@@ -11,12 +12,15 @@ namespace json
 {
 
 #define __json_key(x) #x, &T::x
-#define __json_key_offset(x, y) #x, &T::y
+#define __json_key_offset(x, y) x, &T::y
+#define __json_enum(x) #x, T::x
+#define __json_enum_value(x, y) x, T::y
 
 #define GET_MACRO(_1, _2, NAME, ...) NAME
 
 // require Yes (/Zc:preprocessor)
 #define json_key(...) GET_MACRO(__VA_ARGS__, __json_key_offset, __json_key)(__VA_ARGS__)
+#define json_enum(...) GET_MACRO(__VA_ARGS__, __json_enum_value, __json_enum)(__VA_ARGS__)
 
 template <int N, typename... T>
 using nth_type = typename std::tuple_element<N, std::tuple<T...>>::type;
@@ -31,6 +35,11 @@ constexpr auto struct_meta(Args&&... args)
 			glz::group_builder<std::decay_t<decltype(glz::tuplet::make_copy_tuple(args...))>>::op(
 				glz::tuplet::make_copy_tuple(args...))};
 	}
+}
+
+constexpr auto enumerate_meta(auto&&... args)
+{
+	return glz::enumerate(args...);
 }
 
 template <class T, class S, std::size_t N>
@@ -207,7 +216,7 @@ public:
 	template <glz::opts settings = glz::opts{}>
 	_NODISCARD glz::expected<bool, glz::error_code> loads(std::string_view str)
 	{
-		auto err = glz::read<settings>(m_Doc, str);
+		auto err = glz::read<glz::opt_false<settings, &glz::opts::error_on_unknown_keys>>(m_Doc, str);
 		if (err) {
 			return glz::unexpected(err.ec);
 		}
@@ -238,6 +247,11 @@ public:
 			std::string jptr = "/";
 			return seekable_value(m_Doc, jptr + key.data());
 		}
+	}
+
+	doc_t& get_storage()
+	{
+		return m_Doc;
 	}
 
 protected:
