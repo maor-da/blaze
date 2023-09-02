@@ -108,6 +108,11 @@ public:
 		return s;
 	}
 
+	std::string string()
+	{
+		return glz::write_json(m_Doc);
+	}
+
 	// operator and extractors
 	operator std::string()
 	{
@@ -247,6 +252,11 @@ public:
 			std::string jptr = "/";
 			return seekable_value(m_Doc, jptr + key.data());
 		}
+	}
+
+	void loads(doc_t& doc)
+	{
+		m_Doc = doc;
 	}
 
 	doc_t& get_storage()
